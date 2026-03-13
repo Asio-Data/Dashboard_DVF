@@ -27,6 +27,7 @@ def load_data():
     df_carte = pd.read_parquet('df_simulation_master.parquet')
 
     df['Code departement'] = df['Code departement'].astype(str)
+    df['Nombre pieces principales'] = df['Nombre pieces principales'].astype(int)
     
     df_carte = df_carte.dropna(subset=['polygon', 'prix_simule_m2'])
     if isinstance(df_carte['polygon'].iloc[0], str):
