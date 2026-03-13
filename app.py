@@ -53,7 +53,7 @@ def section_export(df_filtre):
     
     with col_btn:
         # L'interaction ici ne relancera QUE cette fonction 'section_export'
-        if st.button("🛠️ Préparer le fichier CSV", use_container_width=True):
+        if st.button("🛠️ Préparer le fichier CSV", width="stretch"):
             with st.spinner("Génération..."):
                 csv = convert_df_to_csv(df_filtre)
                 
@@ -62,7 +62,7 @@ def section_export(df_filtre):
                     data=csv,
                     file_name=f"export_vergers_{datetime.now().strftime('%d%m_%H%M')}.csv",
                     mime='text/csv',
-                    use_container_width=True
+                    width="stretch"
                 )
     with col_status:
         st.info("Cliquez pour générer le lien de téléchargement sans recharger la page.")
@@ -111,7 +111,7 @@ with st.sidebar:
         
         selected_surface = st.slider("Surface", min_surface, max_surface, (min_surface, max_surface))
         
-        submit_button = st.form_submit_button(label='🚀 Appliquer les filtres', use_container_width=True)
+        submit_button = st.form_submit_button(label='🚀 Appliquer les filtres', width="stretch")
 
 # --- LOGIQUE DE FILTRAGE ---
 # Les filtres ne s'appliquent que si on clique sur le bouton !
@@ -222,7 +222,7 @@ with tab1:
             # Fusion des deux couches
             chart_final = (bars + text).properties(height=400)
 
-            st.altair_chart(chart_final, use_container_width=True)
+            st.altair_chart(chart_final, width="stretch")
             
             if not communes_top10.empty:
                 top_commune = communes_top10.iloc[0]
@@ -270,7 +270,7 @@ with tab1:
             )
 
             # Affichage sur Streamlit
-            st.altair_chart(pie_chart, use_container_width=True)
+            st.altair_chart(pie_chart, width="stretch")
             
             dominant = df_type.loc[df_type['Nombre de ventes'].idxmax()]
             st.caption(f"ℹ️ Le marché est dominé par les **{dominant['Type local'].lower()}s** qui représentent {dominant['pourcentage']:.1f}% des transactions.")
@@ -326,7 +326,7 @@ with tab1:
                 height=400
             )
 
-            st.altair_chart(histogram, use_container_width=True)
+            st.altair_chart(histogram, width="stretch")
             surface_mediane = filtered_df['Surface reelle bati'].median()
             
             st.info(f"""
@@ -364,7 +364,7 @@ with tab1:
             # Fusion de la ligne et des points
             chart_time = (line + points).properties(height=350)
 
-            st.altair_chart(chart_time, use_container_width=True)
+            st.altair_chart(chart_time, width="stretch")
             
             if len(evolution_prix) >= 2:
                 prix_debut = evolution_prix.iloc[0]['prix_m2_median']
@@ -421,7 +421,7 @@ with tab1:
             # Fusion des points et de la courbe
             chart_scatter = (points + trend).properties(height=450)
 
-            st.altair_chart(chart_scatter, use_container_width=True)
+            st.altair_chart(chart_scatter, width="stretch")
             
             st.info("""
             💡En immobilier, plus le bien est petit, plus le prix au mètre carré est élevé. 
@@ -522,4 +522,4 @@ with tab3:
     st.divider()
 
     st.write(f"Affichage des {min(100,len(data_to_show)):,} premières lignes :")
-    st.dataframe(data_to_show.head(100), use_container_width=True)
+    st.dataframe(data_to_show.head(100), width="stretch")
