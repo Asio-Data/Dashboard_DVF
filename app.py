@@ -130,7 +130,7 @@ def build_pydeck_map(prix_max, _df_source):
 # --- BARRE LATÉRALE ---
 with st.sidebar:
 
-    st.image("logo_dark.svg", use_container_width=True)
+    st.image("logo.svg", use_container_width=True)
     st.divider()
 
     st.header("🔍 Filtres de recherche")
