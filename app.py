@@ -1,19 +1,12 @@
 import streamlit as st
 import pandas as pd
-import geopandas as gpd
-import folium
-from streamlit_folium import st_folium
-import os
 import altair as alt
 import plotly.graph_objects as go
 from datetime import datetime
-import numpy as np
 from datetime import datetime
-import random
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import datetime
-import streamlit.components.v1 as components
 import pydeck as pdk
 import ast
 
