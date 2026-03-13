@@ -28,7 +28,7 @@ def load_data():
     colonnes_utiles = [
         'Region', 'Code departement', 'Commune', 'Type local', 
         'Nombre pieces principales', 'Valeur fonciere', 
-        'Surface reelle bati', 'Prix_m2', 'Date mutation'
+        'Surface reelle bati', 'Prix_m2', 'Date mutation','Mois_Vente'
     ]
     df = pd.read_parquet("DVF_2024.parquet",columns=colonnes_utiles)
     df_carte = pd.read_parquet('df_simulation_master.parquet')
