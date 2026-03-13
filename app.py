@@ -25,6 +25,15 @@ def load_data():
     ]
     df = pd.read_parquet("DVF_2024.parquet",columns=colonnes_utiles)
     df_carte = pd.read_parquet('df_simulation_master.parquet')
+
+    df['Code departement'] = df['Code departement'].astype(str)
+    
+    df_carte = df_carte.dropna(subset=['polygon', 'prix_simule_m2'])
+    if isinstance(df_carte['polygon'].iloc[0], str):
+        df_carte['polygon'] = df_carte['polygon'].apply(ast.literal_eval)
+    df_carte['prix_simule_m2'] = pd.to_numeric(df_carte['prix_simule_m2'], errors='coerce')
+    df_carte = df_carte.dropna()
+
     return df, df_carte
 
 df, df_carte = load_data()
@@ -111,33 +120,42 @@ with st.sidebar:
         
         submit_button = st.form_submit_button(label='🚀 Appliquer les filtres', width="stretch")
 
+# --- INITIALISATION DU SESSION STATE ---
+if 'filtered_df' not in st.session_state:
+    st.session_state.filtered_df = df # Au démarrage, on affiche tout
+
 # --- LOGIQUE DE FILTRAGE ---
-# Les filtres ne s'appliquent que si on clique sur le bouton !
-filtered_df = df
+
 
 if submit_button:
+
+    temp_df = df 
+    
     if selected_regions:
-        filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
+        temp_df = temp_df[temp_df['Region'].isin(selected_regions)]
     
     if selected_depts:
-        filtered_df = filtered_df[filtered_df['Code departement'].isin(selected_depts)]
+        temp_df = temp_df[temp_df['Code departement'].isin(selected_depts)]
 
     if selected_type:
-        filtered_df = filtered_df[filtered_df['Type local'].isin(selected_type)]
+        temp_df = temp_df[temp_df['Type local'].isin(selected_type)]
 
     if selected_piece:
-        filtered_df = filtered_df[filtered_df['Nombre pieces principales'].isin(selected_piece)]
+        temp_df = temp_df[temp_df['Nombre pieces principales'].isin(selected_piece)]
         
-    filtered_df = filtered_df[
-        (filtered_df['Valeur fonciere'] >= selected_budget[0]) & 
-        (filtered_df['Valeur fonciere'] <= selected_budget[1])
+    temp_df = temp_df[
+        (temp_df['Valeur fonciere'] >= selected_budget[0]) & 
+        (temp_df['Valeur fonciere'] <= selected_budget[1])
     ]
 
-    filtered_df = filtered_df[
-        (filtered_df['Surface reelle bati'] >= selected_surface[0]) & 
-        (filtered_df['Surface reelle bati'] <= selected_surface[1])
+    temp_df = temp_df[
+        (temp_df['Surface reelle bati'] >= selected_surface[0]) & 
+        (temp_df['Surface reelle bati'] <= selected_surface[1])
     ]
-    st.session_state.filtered_df = filtered_df
+    
+    st.session_state.filtered_df = temp_df
+
+filtered_df = st.session_state.filtered_df
 
 # --- AFFICHAGE DES RÉSULTATS ---
 
@@ -431,27 +449,15 @@ with tab1:
 
 
 with tab2:
-
-    # Copie propre
-    df_carte_clean = df_carte.dropna(subset=['polygon', 'prix_simule_m2'])
-    
-    if isinstance(df_carte_clean['polygon'].iloc[0], str):
-        df_carte_clean['polygon'] = df_carte_clean['polygon'].apply(ast.literal_eval)
-        
-    df_carte_clean['prix_simule_m2'] = pd.to_numeric(df_carte_clean['prix_simule_m2'], errors='coerce')
-    df_echantillon = df_carte_clean.dropna()
-
     col1, col2 = st.columns(2)
-    with col1:
-        pass
     with col2:
         prix_max = st.slider(
             "Plafond de saturation (€/m²)", 
             min_value=2000, max_value=15000, value=10000, step=500,
             help="Les biens plus chers seront affichés avec la couleur maximale."
         )
-
-    # Clipping
+        
+    df_echantillon = df_carte.copy() 
     df_echantillon['prix_sature'] = df_echantillon['prix_simule_m2'].clip(upper=prix_max)
 
     st.markdown(f"""
