@@ -75,6 +75,57 @@ def section_export(df_filtre):
         st.info("Cliquez pour générer le lien de téléchargement sans recharger la page.")
 
 
+@st.cache_resource
+def build_pydeck_map(prix_max, _df_source):
+    df_temp = _df_source.copy()
+    df_temp['prix_sature'] = df_temp['prix_simule_m2'].clip(upper=prix_max)
+
+    # Palette
+    colors_list = [
+        (49/255, 54/255, 149/255), (69/255, 117/255, 180/255), 
+        (116/255, 173/255, 209/255), (171/255, 217/255, 233/255), 
+        (254/255, 224/255, 144/255), (253/255, 174/255, 97/255), 
+        (244/255, 109/255, 67/255), (215/255, 48/255, 39/255), 
+        (165/255, 0/255, 38/255)
+    ]
+    cmap_custom = mcolors.LinearSegmentedColormap.from_list("custom_immo", colors_list)
+    norm = mcolors.Normalize(vmin=0, vmax=prix_max)
+
+    def get_color(prix):
+        r, g, b, _ = cmap_custom(norm(prix))
+        return [int(r * 255), int(g * 255), int(b * 255), 180]
+
+    # Application des couleurs
+    df_temp['couleur_rgb'] = df_temp['prix_sature'].apply(get_color)
+
+    couche_polygones = pdk.Layer(
+        "PolygonLayer",
+        data=df_temp,
+        get_polygon="polygon",
+        get_fill_color="couleur_rgb",
+        filled=True,
+        stroked=False,
+        pickable=True
+    )
+
+    vue_initiale = pdk.ViewState(
+        longitude=2.2137,
+        latitude=46.2276,
+        zoom=5,
+        pitch=0,
+        bearing=0
+    )
+
+    carte_pydeck = pdk.Deck(
+        layers=[couche_polygones],
+        initial_view_state=vue_initiale,
+        map_style="light", 
+        tooltip={"text": "Prix estimé : {prix_simule_m2} €/m²"}
+    )
+    
+    return carte_pydeck
+
+
 # --- BARRE LATÉRALE ---
 with st.sidebar:
     st.header("🔍 Filtres de recherche")
@@ -456,7 +507,7 @@ with tab2:
             min_value=2000, max_value=15000, value=10000, step=500,
             help="Les biens plus chers seront affichés avec la couleur maximale."
         )
-        
+
     df_echantillon = df_carte.copy() 
     df_echantillon['prix_sature'] = df_echantillon['prix_simule_m2'].clip(upper=prix_max)
 
@@ -468,50 +519,7 @@ with tab2:
         </div>
     """, unsafe_allow_html=True)
 
-    # Palette
-    colors_list = [
-        (49/255, 54/255, 149/255), (69/255, 117/255, 180/255), 
-        (116/255, 173/255, 209/255), (171/255, 217/255, 233/255), 
-        (254/255, 224/255, 144/255), (253/255, 174/255, 97/255), 
-        (244/255, 109/255, 67/255), (215/255, 48/255, 39/255), 
-        (165/255, 0/255, 38/255)
-    ]
-    cmap_custom = mcolors.LinearSegmentedColormap.from_list("custom_immo", colors_list)
-    norm = mcolors.Normalize(vmin=0, vmax=prix_max)
-
-    # Fonction pour transformer un prix en [R, G, B, Opacité]
-    def get_color(prix):
-        r, g, b, _ = cmap_custom(norm(prix))
-        return [int(r * 255), int(g * 255), int(b * 255), 180]
-
-    df_echantillon['couleur_rgb'] = df_echantillon['prix_sature'].apply(get_color)
-
-
-    couche_polygones = pdk.Layer(
-        "PolygonLayer",
-        data=df_echantillon,
-        get_polygon="polygon",
-        get_fill_color="couleur_rgb",
-        filled=True,
-        stroked=False,
-        pickable=True
-    )
-
-    vue_initiale = pdk.ViewState(
-        longitude=2.2137,
-        latitude=46.2276,
-        zoom=5,
-        pitch=0,
-        bearing=0
-    )
-
-    carte_pydeck = pdk.Deck(
-        layers=[couche_polygones],
-        initial_view_state=vue_initiale,
-        map_style="light", 
-        tooltip={"text": "Prix estimé : {prix_simule_m2} €/m²"}
-    )
-
+    carte_pydeck = build_pydeck_map(prix_max, df_carte)
     # Affichage
     st.pydeck_chart(carte_pydeck)
 
