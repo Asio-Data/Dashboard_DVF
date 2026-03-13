@@ -25,7 +25,12 @@ st.set_page_config(page_title="Data Analysis - Immobilier", layout="wide")
 # --- CHARGEMENT DES DONNEES ---
 @st.cache_data
 def load_data():
-    df = pd.read_parquet("DVF_2024.parquet")
+    colonnes_utiles = [
+        'Region', 'Code departement', 'Commune', 'Type local', 
+        'Nombre pieces principales', 'Valeur fonciere', 
+        'Surface reelle bati', 'Prix_m2', 'Date mutation'
+    ]
+    df = pd.read_parquet("DVF_2024.parquet",columns=colonnes_utiles)
     df_carte = pd.read_parquet('df_simulation_master.parquet')
     return df, df_carte
 
@@ -33,7 +38,7 @@ df, df_carte = load_data()
 
 # --- INITIALISATION DU SESSION STATE ---
 if 'filtered_df' not in st.session_state:
-    st.session_state.filtered_df = df.copy()
+    st.session_state.filtered_df = df
 
 # --- FONCTIONS ---
 current_year = datetime.datetime.now().year
@@ -115,7 +120,7 @@ with st.sidebar:
 
 # --- LOGIQUE DE FILTRAGE ---
 # Les filtres ne s'appliquent que si on clique sur le bouton !
-filtered_df = df.copy()
+filtered_df = df
 
 if submit_button:
     if selected_regions:
@@ -297,7 +302,7 @@ with tab1:
             labels = [f"{i}-{i+25}" for i in bins[:-1]]
             
             # colonne temporaire avec ces tranches via pd.cut
-            df_hist = filtered_df[['Surface reelle bati', 'Type local']].copy()
+            df_hist = filtered_df[['Surface reelle bati', 'Type local']]
             df_hist['Tranche'] = pd.cut(df_hist['Surface reelle bati'], bins=bins, labels=labels, right=False)
             
             df_agg = df_hist.groupby(['Tranche', 'Type local'], observed=True).size().reset_index(name='Nombre de ventes')
@@ -395,7 +400,7 @@ with tab1:
             if len(filtered_df) > limite_points:
                 df_scatter = filtered_df.sample(n=limite_points, random_state=42)
             else:
-                df_scatter = filtered_df.copy()
+                df_scatter = filtered_df
 
             # Création de la base du graphique
             base_scatter = alt.Chart(df_scatter).encode(
@@ -435,7 +440,7 @@ with tab1:
 with tab2:
 
     # Copie propre
-    df_carte_clean = df_carte.dropna(subset=['polygon', 'prix_simule_m2']).copy()
+    df_carte_clean = df_carte.dropna(subset=['polygon', 'prix_simule_m2'])
     
     if isinstance(df_carte_clean['polygon'].iloc[0], str):
         df_carte_clean['polygon'] = df_carte_clean['polygon'].apply(ast.literal_eval)
