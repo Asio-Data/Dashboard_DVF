@@ -210,7 +210,7 @@ filtered_df = st.session_state.filtered_df
 
 # --- AFFICHAGE DES RÉSULTATS ---
 
-st.title("🏘️ Pilotage Technique du marché de l'immobilier (2024)")
+st.title("🏘️ Analyse du marché de l'immobilier (2024)")
 current_year = datetime.datetime.now().year
 # KPIs
 c1, c2, c3, c4 = st.columns(4)
