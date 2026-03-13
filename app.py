@@ -130,9 +130,6 @@ def build_pydeck_map(prix_max, _df_source):
 # --- BARRE LATÉRALE ---
 with st.sidebar:
 
-    st.image("logo_dark.svg", use_container_width=True)
-    st.divider()
-
     st.header("🔍 Filtres de recherche")
 
     df['Code departement'] = df['Code departement'].astype(str)
@@ -175,6 +172,13 @@ with st.sidebar:
         selected_surface = st.slider("Surface", min_surface, max_surface, (min_surface, max_surface))
         
         submit_button = st.form_submit_button(label='🚀 Appliquer les filtres', width="stretch")
+
+    st.divider()
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.image("logo_dark.svg", width=150)
+    with col2:
+        st.caption('Asio Data SARL au capital de 2000€ - RCS Paris 101 111 276')
 
 # --- INITIALISATION DU SESSION STATE ---
 if 'filtered_df' not in st.session_state:
