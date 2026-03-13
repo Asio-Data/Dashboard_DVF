@@ -25,8 +25,8 @@ st.set_page_config(page_title="Data Analysis - Immobilier", layout="wide")
 # --- CHARGEMENT DES DONNEES ---
 @st.cache_data
 def load_data():
-    df = pd.read_parquet("DVF_2024.csv")
-    df_carte = pd.read_parquet('df_simulation_master.csv')
+    df = pd.read_parquet("DVF_2024.parquet")
+    df_carte = pd.read_parquet('df_simulation_master.parquet')
     return df, df_carte
 
 df, df_carte = load_data()
