@@ -210,7 +210,7 @@ filtered_df = st.session_state.filtered_df
 
 # --- AFFICHAGE DES RÉSULTATS ---
 
-st.title("🏘️ Pilotage Technique du marché de l'immobilier")
+st.title("🏘️ Pilotage Technique du marché de l'immobilier (2024)")
 current_year = datetime.datetime.now().year
 # KPIs
 c1, c2, c3, c4 = st.columns(4)
@@ -535,3 +535,13 @@ with tab3:
 
     st.write(f"Affichage des {min(100,len(data_to_show)):,} premières lignes :")
     st.dataframe(data_to_show.head(100), width="stretch")
+
+
+# --- FOOTER / MENTIONS LÉGALES ---
+st.divider() 
+
+st.caption("""
+**⚠️ Avertissement & Sources :** Ce tableau de bord est un outil interactif de démonstration développé par **Asio Data**. 
+Il exploite la base de données ouverte *Demandes de Valeurs Foncières (DVF)* mise à disposition par le gouvernement français sur data.gouv.fr. 
+Les analyses, indicateurs et cartographies présentés n'ont qu'une valeur purement indicative. Asio Data ne saurait être tenu responsable de l'utilisation de ce tableau de bord à des fins d'estimation de biens, de conseil financier ou de décision d'investissement immobilier.
+""")
